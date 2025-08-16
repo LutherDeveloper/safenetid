@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard Warga - SafeNetID</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-3xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-xl font-bold">Dashboard Warga</h1>
+      <button id="logoutBtn" class="px-3 py-1 bg-red-600 text-white rounded">Logout</button>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="font-semibold mb-2">Laporan Saya</h2>
+      <div id="myReports">Loading...</div>
+      <div class="mt-4">
+        <a href="/laporan.html" class="px-3 py-2 bg-green-600 text-white rounded">Buat Laporan Baru</a>
+      </div>
+    </div>
+  </div>
+<script>
+async function loadMyReports(){
+  const res = await fetch('/api/my-reports');
+  if(res.status===403){ alert('Silakan login'); window.location='/login.html'; return; }
+  const rows = await res.json();
+  const el = document.getElementById('myReports');
+  if(!rows.length) { el.innerHTML = '<div class="text-sm text-gray-500">Belum ada laporan</div>'; return; }
+  el.innerHTML = '<ul class="space-y-2">' + rows.map(r=>`<li class="p-2 border rounded"><strong>${r.site}</strong><div class="text-sm text-gray-600">${r.note||''}</div><div class="text-xs text-gray-400">${r.status} • ${r.created_at}</div></li>`).join('') + '</ul>';
+}
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await fetch('/api/logout',{method:'POST'}); window.location='/' });
+loadMyReports();
+</script>

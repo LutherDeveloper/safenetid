@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Login - SafeNetID</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-sm mx-auto p-6">
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
+      <form id="adminLogin">
+        <input name="username" placeholder="Username" class="w-full mb-2 p-2 border rounded" required/>
+        <input name="password" type="password" placeholder="Password" class="w-full mb-2 p-2 border rounded" required/>
+        <button class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
+      </form>
+    </div>
+  </div>
+<script>
+document.getElementById('adminLogin').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = { username: fd.get('username'), password: fd.get('password') };
+  const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const j = await res.json();
+  if(j.success) window.location='/admin/dashboard.html'; else alert(j.message||'Gagal login');
+});
+</script>

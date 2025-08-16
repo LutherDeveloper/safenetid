@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Buat Laporan - SafeNetID</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-lg mx-auto p-6">
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Form Laporan</h2>
+      <form id="reportForm">
+        <input name="site" placeholder="Alamat situs (contoh: judi123.com)" class="w-full mb-2 p-2 border rounded" required />
+        <textarea name="note" placeholder="Keterangan / bukti" class="w-full mb-2 p-2 border rounded"></textarea>
+        <button class="w-full bg-green-600 text-white p-2 rounded">Kirim Laporan</button>
+      </form>
+    </div>
+  </div>
+<script>
+document.getElementById('reportForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = { site: fd.get('site'), note: fd.get('note') };
+  const res = await fetch('/api/report', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const j = await res.json();
+  if(j.success) { alert('Laporan terkirim'); window.location='/' }
+  else if(j.error) alert(j.error); else alert('Gagal');
+});
+</script>

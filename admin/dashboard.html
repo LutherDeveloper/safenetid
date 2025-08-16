@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard - SafeNetID</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+      <button id="adminLogout" class="px-3 py-1 bg-red-600 text-white rounded">Logout</button>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="text-lg font-semibold mb-4">Semua Laporan</h2>
+      <div id="reports">Loading...</div>
+    </div>
+  </div>
+<script>
+async function loadReports(){
+  const res = await fetch('/api/admin/reports');
+  if(res.status===403){ alert('Unauthorized'); window.location='/admin/login.html'; return; }
+  const rows = await res.json();
+  const el = document.getElementById('reports');
+  if(!rows.length) { el.innerHTML = '<div class="text-sm text-gray-500">Belum ada laporan</div>'; return; }
+  el.innerHTML = '<table class="min-w-full"><thead><tr><th>ID</th><th>Reporter</th><th>Site</th><th>Note</th><th>Status</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody>'
+    + rows.map(r=>`<tr class="border-t"><td class="px-2 py-1">${r.id}</td><td class="px-2 py-1">${r.reporter||'-'}</td><td class="px-2 py-1">${r.site}</td><td class="px-2 py-1">${r.note||''}</td><td class="px-2 py-1">${r.status}</td><td class="px-2 py-1">${r.created_at}</td><td class="px-2 py-1"><button onclick="setStatus(${r.id},'Processing')" class="px-2 py-1 bg-yellow-500 text-white rounded">Proses</button> <button onclick="setStatus(${r.id},'Resolved')" class="px-2 py-1 bg-green-600 text-white rounded">Selesai</button> <button onclick="del(${r.id})" class="px-2 py-1 bg-red-600 text-white rounded">Hapus</button></td></tr>`).join('')
+    + '</tbody></table>';
+}
+
+async function setStatus(id, status){
+  await fetch('/api/admin/reports/'+id+'/status', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status }) });
+  loadReports();
+}
+async function del(id){
+  if(!confirm('Hapus laporan ini?')) return;
+  await fetch('/api/admin/reports/'+id, { method:'DELETE' });
+  loadReports();
+}
+document.getElementById('adminLogout').addEventListener('click', async ()=>{ await fetch('/api/admin/logout',{method:'POST'}); window.location='/admin/login.html';});
+loadReports();
+</script>
